@@ -1191,7 +1191,8 @@
     margin-top: 0
 }
 
-.snippet {
-    border: 1px solid #444444;
+.code-snippet {
+    border: 1px solid #6b6b6b;
     font-family: monospace;
+    padding: 15px 0;
 }
