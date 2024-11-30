@@ -1192,7 +1192,18 @@
 }
 
 .code-snippet {
-    border: 1px solid #6b6b6b;
+    border: 1px solid #b2b2b2;
     font-family: monospace;
     padding: 15px 0;
+    border-radius: 6px;
+}
+
+.inline-code-snippet {
+    font-family: monospace;
+}
+
+.listing-header {
+    font-family: monospace;
+    margin-left: 0.5em;
+    font-size: 14px;
 }
