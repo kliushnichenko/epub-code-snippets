@@ -1,9 +1,16 @@
+import os
+
 from pyquery import PyQuery as pq
 import re
 
 # Path to the HTML file
-split_num = "014"
-file_path = f'samples/The_Robert_C._Martin_Clean_Code_split_{split_num}.html'
+# split_num = "014"
+# file_path = f'samples/The_Robert_C._Martin_Clean_Code_split_{split_num}.html'
+
+source_dir = "source"
+target_dir = "target"
+
+
 
 namespaces = {'xhtml': 'http://www.w3.org/1999/xhtml'}
 java_patterns = [
@@ -34,6 +41,13 @@ java_patterns = [
 
 
 def main():
+    for filename in os.listdir(source_dir):
+        if filename.endswith('.html'):
+            file_path = os.path.join(source_dir, filename)
+            process_file(file_path, filename)
+
+
+def process_file(file_path, filename):
     with open(file_path, 'rb') as file:
         original_html_content = file.read()
 
@@ -48,7 +62,7 @@ def main():
 
         text = pq_element.text()
         if is_java_code(text):
-            print(f"Found match in element <{element.tag}>: {text}")
+            print(f"Found match in element <{element.tag}>: \n {text} \n\n")
             tt_elems = pq_element.find('tt')
             if len(tt_elems) > 0:
                 for tt_elem in tt_elems:
@@ -65,9 +79,9 @@ def main():
                     prev_elem.add_class("listing-header")
 
     # restore xmlns namespace
-    doc('html').attr("xmlns", "http://www.w3.org/1999/xhtml")
-    with open(f'samples/split_{split_num}_patched.html', 'w', encoding='utf-8') as f:
-        f.write(doc.html())  # Write the modified HTML content
+    result = f'<html xmlns="http://www.w3.org/1999/xhtml">{doc.html()}</html>'
+    with open(f'{target_dir}/{filename}', 'w', encoding='utf-8') as f:
+        f.write(result)  # Write the modified HTML content
 
 
 def is_java_code(text: str) -> bool:
@@ -76,6 +90,7 @@ def is_java_code(text: str) -> bool:
             return True
 
     return False
+
 
 if __name__ == "__main__":
     main()
