@@ -3,16 +3,9 @@ import os
 from pyquery import PyQuery as pq
 import re
 
-# Path to the HTML file
-# split_num = "014"
-# file_path = f'samples/The_Robert_C._Martin_Clean_Code_split_{split_num}.html'
-
 source_dir = "source"
 target_dir = "target"
 
-
-
-namespaces = {'xhtml': 'http://www.w3.org/1999/xhtml'}
 java_patterns = [
     re.compile(r'\) \{'),           # Matches "someMethod() {"
     re.compile(r'int \w+;'),        # Matches "int variable" definition
@@ -62,26 +55,32 @@ def process_file(file_path, filename):
 
         text = pq_element.text()
         if is_java_code(text):
-            print(f"Found match in element <{element.tag}>: \n {text} \n\n")
-            tt_elems = pq_element.find('tt')
-            if len(tt_elems) > 0:
-                for tt_elem in tt_elems:
-                    tt_pq = pq(tt_elem)
-                    tt_pq.add_class("inline-code-snippet")
-            else:
-                pq_element.add_class("code-snippet")
-                raw_html = pq_element.html()
-                if raw_html.startswith('  '):
-                    pq_element.html(raw_html[2:])
-
-                prev_elem = pq_element.prev()
-                if prev_elem[0].tag == 'blockquote':
-                    prev_elem.add_class("listing-header")
+            process_element(element, pq_element, text)
 
     # restore xmlns namespace
     result = f'<html xmlns="http://www.w3.org/1999/xhtml">{doc.html()}</html>'
     with open(f'{target_dir}/{filename}', 'w', encoding='utf-8') as f:
-        f.write(result)  # Write the modified HTML content
+        f.write(result)
+
+
+def process_element(element, pq_element, text):
+    print(f"Found match in element <{element.tag}>: \n {text} \n\n")
+    tt_elems = pq_element.find('tt')
+    if len(tt_elems) > 0:
+        # handle inline matches
+        for tt_elem in tt_elems:
+            tt_pq = pq(tt_elem)
+            tt_pq.add_class("inline-code-snippet")
+    else:
+        pq_element.add_class("code-snippet")
+        raw_html = pq_element.html()
+        # remove odd whitespaces
+        if raw_html.startswith('  '):
+            pq_element.html(raw_html[2:])
+
+        prev_elem = pq_element.prev()
+        if prev_elem[0].tag == 'blockquote':
+            prev_elem.add_class("listing-header")
 
 
 def is_java_code(text: str) -> bool:
